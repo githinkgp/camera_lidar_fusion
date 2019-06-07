@@ -1,0 +1,18 @@
+<package format="2">
+    <name>camera_lidar_fusion</name>
+    <version>0.0.1</version>
+    <description>
+        human position fusion from astra and rplidar
+    </description>
+    <maintainer email="zhan1499@purdue.edu">Chiyu Zhang</maintainer>
+    <license>BSD</license>
+    
+    <author>Chiyu Zhang</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <depend>rospy</depend>
+    <depend>std_msgs</depend>
+    <build_depend>message_generation</build_depend>
+    <exec_depend>message_runtime</exec_depend>
+
+</package>
