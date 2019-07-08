@@ -2,7 +2,7 @@
 
 # basic python imports
 import numpy as np
-from math import tan,atan,degrees,radians
+from math import tan,atan,degrees,radians,fabs
 
 # ros imports
 import rospy
@@ -145,7 +145,7 @@ def fusion_main():
             ClusterLength = []
             ClusterData = []
             for j in range(DataLength-1):
-                if LidarPersonData[j][1]-LidarPersonData[j+1][1]>RangeDiscardThres:
+                if fabs(LidarPersonData[j][1]-LidarPersonData[j+1][1])>RangeDiscardThres:
                     ClusterIndex.append(j)
                     ClusterLength.append(ClusterIndex[-1]-ClusterIndex[-2])
                     ClusterData.append(LidarPersonData[ClusterIndex[-2]:ClusterIndex[-1]])
@@ -155,23 +155,33 @@ def fusion_main():
 
             # average each of the clusters
             NumOfClusters = len(ClusterLength)
+            Test=[]
             for j in range(NumOfClusters):
                 FusedClusters[i].append(FusedPerson())
                 ClusterSeg = ClusterData[j]
                 NormFactor = len(ClusterSeg)
                 FusedClusters[i][j].angle = 0.0
                 FusedClusters[i][j].distance = 0.0
+                Test.append(0.0)
                 for Data in ClusterSeg:
                     FusedClusters[i][j].angle += Data[0]/NormFactor
                     FusedClusters[i][j].distance += Data[1]/NormFactor
+                    Test[j] += Data[1]/NormFactor
 
-            # use the largest cluster as person data
+            # OPTION 1: use the largest cluster as person data
             # update note: output all the fused clusters and perform data association
+            """
             PersonDataLength = max(ClusterLength)
             PersonDataIndex = ClusterLength.index(PersonDataLength)
             LidarPersonData = FusedClusters[i][PersonDataIndex]
             PersonMsg.angle = LidarPersonData.angle
             PersonMsg.distance = LidarPersonData.distance
+            """
+            # OPTION 2: Choose the cluster closest to the Lidar
+
+            PersonMsg.distance = min(Test)
+            Idx = Test.index(PersonMsg.distance)
+            PersonMsg.angle = FusedClusters[i][Idx].angle
             # publish msg
             FusedMsg.persons.append(PersonMsg)
         # endfor
